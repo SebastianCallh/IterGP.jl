@@ -6,21 +6,6 @@ b = [1., 2., 3.]
 
 function chol(A, n)
     A′ = copy(A)
-    L = diagm(ones(size(A, 1)))
-    for i in 1:n
-        Iᵢ = A′[:,i] / sqrt(A′[i,i])
-        A′ .= A′ - Iᵢ*Iᵢ'
-        L[:,i] = Iᵢ
-    end
-    LowerTriangular(L)
-end
-
-L = chol(A, 3)
-@assert L*L' == A
-@assert L == cholesky(A).L
-
-function chol_inv(A, n)
-    A′ = copy(A)
     C = zeros(size(A))
     L = diagm(ones(size(A, 1)))
     for i in 1:n
@@ -39,10 +24,11 @@ function chol_inv(A, n)
     LowerTriangular(L), C
 end
 
-L, C = chol_inv(A, size(A, 1))
+@btime L, C = chol($A, 3);
+@assert L*L' == A
 @assert inv(A) ≈ C
 
-function gc_inv(A, b, x₀; rtol=1e-6, atol=1e-6, maxiters=length(b))
+function gc(A, b, x₀; rtol=1e-6, atol=1e-6, maxiters=length(b))
     x = copy(x₀)
     C = zeros(size(A))
     r = fill(Inf, length(b))
@@ -65,5 +51,5 @@ function gc_inv(A, b, x₀; rtol=1e-6, atol=1e-6, maxiters=length(b))
 end
 
 x0 = randn(size(A, 1))
-x, C = gc_inv(A, b, x0)
+@btime x, C = gc_inv($A, $b, $x0);
 @assert x ≈ A\b
