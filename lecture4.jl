@@ -34,6 +34,7 @@ function gc(A, b, x₀; rtol=1e-6, atol=1e-6, maxiters=length(b))
     r = fill(Inf, length(b))
     i = 0
     while norm(r) > max(rtol*norm(b), atol)
+        i += 1
         if i == maxiters
             println("Maximum number of iterations reached")
             return x, C
