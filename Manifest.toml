@@ -2,13 +2,7 @@
 
 julia_version = "1.8.3"
 manifest_format = "2.0"
-project_hash = "e7767cbfb4e113187030964730b0e92b7e52c900"
-
-[[deps.AbstractGPs]]
-deps = ["ChainRulesCore", "Distributions", "FillArrays", "IrrationalConstants", "KernelFunctions", "LinearAlgebra", "PDMats", "Random", "RecipesBase", "Reexport", "Statistics", "StatsBase", "Test"]
-git-tree-sha1 = "2787c1cd4853242411cc3da8022f3c23494552a7"
-uuid = "99985d1d-32ba-4be9-9821-2ec096f28918"
-version = "0.5.13"
+project_hash = "f309a56694aa5f153ad577e0eb4b2e33174a97a7"
 
 [[deps.ArgTools]]
 uuid = "0dad84c5-d112-42e6-8d28-ef12dabb789f"
