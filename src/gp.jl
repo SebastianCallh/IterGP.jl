@@ -41,9 +41,13 @@ struct Posterior{K <: Kernel, T <: AbstractFloat} <: AbstractGP
     X::Vector{T}
 end
 
-function (p::Posterior)(x)
+function (p::Posterior)(x; jitter=1e-6)
     μₙ = p.mean.(x) + kernelmatrix(p.kernel, x, p.X)*p.v
-    Σₙ = Hermitian(kernelmatrix(p.kernel, x) - kernelmatrix(p.kernel, x, p.X)*p.C*kernelmatrix(p.kernel, p.X, x))
+    Σₙ = Hermitian(
+        kernelmatrix(p.kernel, x) -
+        kernelmatrix(p.kernel, x, p.X)*p.C*kernelmatrix(p.kernel, p.X, x) + 
+        Diagonal(fill(jitter, length(x)))
+    )
     MvNormal(μₙ, Σₙ)
 end
 
