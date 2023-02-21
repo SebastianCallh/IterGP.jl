@@ -5,24 +5,18 @@ using LinearAlgebra
 using Random
 
 include("../src/itergp.jl")
-using .IterGP
 isdir("plots") || mkdir("plots")
 
-rng = MersenneTwister(1234)
-n = 500
-x = Float64.(collect(range(-4, 4, n)))
-xx = collect(1.4 .* range(extrema(x)..., 200))
-y = sin.(x) .+ 0.25*randn(rng, length(x))
-k = Matern32Kernel()
+n = 100
 σ² = 0.25
-prior = GP(Returns(0.), k, σ²)
-plot(prior, xx)
+rng = MersenneTwister(1234)
+x, y = sinusoid(rng, n, sqrt(σ²))
+xx = collect(1.4 .* range(extrema(x)..., 200))
 
-cholesky_policy = CholeskyPolicy(length(x), 50)
-cholesky_post = posterior(cholesky_policy, prior, x, y)
-cholesky_fit_plt = plot(cholesky_post, xx, title="Cholesky fit")
-scatter!(cholesky_fit_plt, x, y, label="Data", color=2)
-savefig(cholesky_fit_plt, joinpath("plots", "cholesky_posterior.png"))
+k = Matern32Kernel()
+prior = GP(Returns(0.), k, σ²)
+prior_plt = plot(prior, xx)
+scatter!(prior_plt, x, y, color=2, label="Data")
 
 function perm(n)
     m = n
@@ -34,19 +28,26 @@ function perm(n)
     A 
 end
 S = perm(n)
-xperm = S*x
-yperm = S*y
-Prank = 100
+Sx = S*x
+Sy = S*y
+
+cholesky_policy = CholeskyPolicy(length(x), min(n, 300))
+cholesky_post = posterior(cholesky_policy, prior, Sx, Sy)
+cholesky_fit_plt = plot(cholesky_post, xx, title="Cholesky fit")
+scatter!(cholesky_fit_plt, x, y, label="Data", color=2)
+savefig(cholesky_fit_plt, joinpath("plots", "cholesky_posterior.png"))
+
+rank = 100
 x0 = rand(length(x))
-K = kernelmatrix(prior.kernel, xpperm)
+K = kernelmatrix(prior.kernel, Sx)
 A = K + σ²*I
-b = yperm - prior.mean.(xperm)
-P = cholesky_preconditioner(K, Prank, σ²)
+b = Sy - prior.mean.(Sx)
+P = cholesky_preconditioner(K, rank, σ²)
 cond(A)
 cond(P\A)
 
 cg_policy = ConjugateGradientPolicy(A, b, x0, P, n, 1e-6, 1e-6);
-cg_post = posterior(cg_policy, prior, xperm, yperm);
+cg_post = posterior(cg_policy, prior, Sx, Sy);
 cg_fit_plt = plot(cg_post, xx, title="Conjugate gradients fit")
 scatter!(cg_fit_plt, x, y, label="Data", color=2)
 savefig(cg_fit_plt, joinpath("plots", "cg_posterior.png"))
