@@ -6,8 +6,9 @@ using Random
 
 include("../src/itergp.jl")
 isdir("plots") || mkdir("plots")
+ylims = (-5, 5)
 
-n = 100
+n = 500
 σ² = 0.25
 rng = MersenneTwister(1234)
 x, y = sinusoid(rng, n, sqrt(σ²))
@@ -33,21 +34,26 @@ Sy = S*y
 
 cholesky_policy = CholeskyPolicy(length(x), min(n, 300))
 cholesky_post = posterior(cholesky_policy, prior, Sx, Sy)
-cholesky_fit_plt = plot(cholesky_post, xx, title="Cholesky fit")
+cholesky_fit_plt = plot(cholesky_post, xx, title="Cholesky fit"; ylims)
 scatter!(cholesky_fit_plt, x, y, label="Data", color=2)
 savefig(cholesky_fit_plt, joinpath("plots", "cholesky_posterior.png"))
 
-rank = 100
-x0 = rand(length(x))
+rank = 15
+x0 = zeros(length(Sx))
 K = kernelmatrix(prior.kernel, Sx)
+P = cholesky_preconditioner(K, rank, σ²)
+
 A = K + σ²*I
 b = Sy - prior.mean.(Sx)
-P = cholesky_preconditioner(K, rank, σ²)
-cond(A)
-cond(P\A)
 
-cg_policy = ConjugateGradientPolicy(A, b, x0, P, n, 1e-6, 1e-6);
+cg_policy = ConjugateGradientPolicy(A, b, x0, n)
 cg_post = posterior(cg_policy, prior, Sx, Sy);
-cg_fit_plt = plot(cg_post, xx, title="Conjugate gradients fit")
+cg_fit_plt = plot(cg_post, xx, title="Conjugate gradients fit"; ylims);
 scatter!(cg_fit_plt, x, y, label="Data", color=2)
 savefig(cg_fit_plt, joinpath("plots", "cg_posterior.png"))
+
+pcg_policy = PreconditionedConjugateGradientPolicy(A, b, x0, n, P)
+pcg_post = posterior(pcg_policy, prior, Sx, Sy);
+cg_fit_plt = plot(cg_post, xx, title="Preconditioned conjugate gradients fit"; ylims);
+scatter!(cg_fit_plt, x, y, label="Data", color=2) 
+savefig(cg_fit_plt, joinpath("plots", "precond_cg_posterior.png"))

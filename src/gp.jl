@@ -3,7 +3,7 @@ abstract type AbstractGP end
 @recipe function f(gp::AbstractGP, xx)
     py = gp(xx)
     legend --> :topleft
-    
+
     @series begin
         ribbon --> 2 .* sqrt.(var(py))
         ribbonalpha --> 0.5
@@ -55,20 +55,21 @@ end
 function posterior(policy, prior, X, y)
     (; mean, kernel, σ²) = prior
     K̂ = kernelmatrix(kernel, X) + σ²*I
-    r = [fill(Inf, length(y))]
-    v = zeros(length(y))
     μ = mean.(X)
+
+    r = zeros(length(y))
+    v = zeros(length(y))    
     C = zeros(size(K̂))
-    for i in 2:maxiters(policy)
+    for i in 1:maxiters(policy)
         sᵢ = action(policy)
-        push!(r, (y - μ) - K̂*v)
-        αᵢ = sᵢ'r[i]
+        r = (y - μ) - K̂*v
+        αᵢ = sᵢ'r
         dᵢ = (I - C*K̂)*sᵢ
         ηᵢ = sᵢ'K̂*dᵢ
-        C .= C + dᵢ*dᵢ' ./ ηᵢ
-        v .= v + dᵢ*αᵢ/ηᵢ
-        if done(policy, r[i], i)
-            println("Converged in $i iterations")
+        C .+= dᵢ*dᵢ' ./ ηᵢ
+        v .+= dᵢ*αᵢ/ηᵢ
+        if done(policy, r, i)
+            println("Converged in $i iterations\nResidual norm: $(norm(r))")
             break
         end
         update!(policy, dᵢ, αᵢ, ηᵢ)

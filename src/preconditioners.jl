@@ -1,3 +1,5 @@
+using LinearAlgebra
+
 function cholesky_preconditioner(A, rank, σ²)
     A′ = copy(A)
     n, k = size(A, 1), rank
@@ -8,7 +10,7 @@ function cholesky_preconditioner(A, rank, σ²)
         L[:,i] = Iᵢ
     end
 
-    D = diagm(fill(σ², n))
-    I = diagm(ones(k))
-    SymWoodbury(D, L, I)
+    Σ = diagm(fill(σ², n))
+    D = Diagonal(ones(k))
+    SymWoodbury(Σ, L, D)
 end
