@@ -5,17 +5,15 @@ using Plots
 using Random
 
 include("../src/itergp.jl")
-using .IterGP
 isdir("plots") || mkdir("plots")
 
-rng = MersenneTwister(1234)
 n = 1000
-x = Float64.(collect(range(-4, 4, n)))
-xx = collect(1.4 .* range(extrema(x)..., 200))
-y = sin.(x) .+ 0.25*randn(rng, length(x))
-k = Matern32Kernel()
 σ² = 0.25
+rng = MersenneTwister(1234)
+x, y = sinusoid(rng, n, sqrt(σ²))
+
 ℓ = 100
+k = Matern32Kernel()
 K = kernelmatrix(k, x)
 A = K + σ²*I
 P = Matrix(cholesky_preconditioner(K, ℓ, σ²))
