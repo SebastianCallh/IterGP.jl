@@ -6,9 +6,11 @@ using Random
 
 include("../src/itergp.jl")
 using .IterGP
+isdir("plots") || mkdir("plots")
 
 rng = MersenneTwister(1234)
-x = Float64.(collect(range(-4, 4, 500)))
+n = 500
+x = Float64.(collect(range(-4, 4, n)))
 xx = collect(1.4 .* range(extrema(x)..., 200))
 y = sin.(x) .+ 0.25*randn(rng, length(x))
 k = Matern32Kernel()
@@ -34,11 +36,12 @@ end
 S = perm(n)
 xperm = S*x
 yperm = S*y
-A = kernelmatrix(prior.kernel, xperm)
-b = yperm - prior.mean.(xperm)
-
+Prank = 100
 x0 = rand(length(x))
-P = cholesky_preconditioner(A, 100, σ²)
+K = kernelmatrix(prior.kernel, xpperm)
+A = K + σ²*I
+b = yperm - prior.mean.(xperm)
+P = cholesky_preconditioner(K, Prank, σ²)
 cond(A)
 cond(P\A)
 
