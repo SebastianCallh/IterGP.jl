@@ -1,5 +1,6 @@
-# Probnum stuffs in Julia
+# IterGP.jl
 
-Some Julia implementations of algorithms explained in [Numerics of Machine Learning](https://www.youtube.com/watch?v=RqFwO3GwYf4&list=PL05umP7R6ij2lwDdj7IkuHoP9vHlEcH0s) at the University of Tübingen.
+A Julia implementation of [Posterior and Computational Uncertainty
+in Gaussian Processes](https://arxiv.org/pdf/2205.15449.pdf).
 
-It's cool stuff.
+Pretty cool stuff.
