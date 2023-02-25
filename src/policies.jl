@@ -1,6 +1,6 @@
-abstract type Policy end
+abstract type AbstractPolicy end
 
-mutable struct CholeskyPolicy <: Policy
+mutable struct CholeskyPolicy <: AbstractPolicy
     dim::Int32
     rank::Int32
     i::Int32
@@ -25,70 +25,27 @@ function maxiters(p::CholeskyPolicy)
     p.rank
 end
 
-
-mutable struct PreconditionedConjugateGradientPolicy{T <: AbstractFloat} <: Policy
-    A::Matrix{T}
-    b::Vector{T}
-    x::Vector{T}
-    maxiters::Int64
-    P::Union{SymWoodbury{T}, Matrix{T}}
-    abstol::Float64
-    reltol::Float64
+struct ConjugateGradientPolicy{
+    P <: Union{Nothing, AbstractPreconditioner},
+    T <: AbstractFloat,
+    Tx <: AbstractVector{T}
+} <: AbstractPolicy
+    x₀::Tx
+    preconditioner::P
+    maxiters::Int
+    abstol::T
+    reltol::T
 end
 
-function PreconditionedConjugateGradientPolicy(A, b, x, maxiters, P; abstol=1e-6, reltol=1e-6)
-    PreconditionedConjugateGradientPolicy(A, b, x, maxiters, P, abstol, reltol)
+function ConjugateGradientPolicy(x₀, maxiters; P=nothing, abstol=1e-2, reltol=1e-2)
+    ConjugateGradientPolicy(x₀, P, maxiters, abstol, reltol)
 end
 
-function done(p::PreconditionedConjugateGradientPolicy, r, i)
-    return (
-        norm(r) <= max(p.reltol*norm(p.b), p.abstol) ||
-        i >= p.maxiters
-    )
-end
+maxiters(p::ConjugateGradientPolicy) = p.maxiters
 
-function action(p::PreconditionedConjugateGradientPolicy)
-    (;A, b, x, P) = p
-    P\(b - A*x)
-end
-
-function update!(p::PreconditionedConjugateGradientPolicy, dᵢ, αᵢ, ηᵢ)
-    p.x += dᵢ * αᵢ/ηᵢ
-end
-
-function maxiters(p::PreconditionedConjugateGradientPolicy)
-    p.maxiters
-end
-
-mutable struct ConjugateGradientPolicy{T <: AbstractFloat} <: Policy
-    A::Matrix{T}
-    b::Vector{T}
-    x::Vector{T}
-    maxiters::Int64
-    abstol::Float64
-    reltol::Float64
-end
-
-function ConjugateGradientPolicy(A, b, x, maxiters; abstol=1e-6, reltol=1e-6)
-    ConjugateGradientPolicy(A, b, x, maxiters, abstol, reltol)
-end
-
-function done(p::ConjugateGradientPolicy, r, i)
-    return (
-        norm(r) <= max(p.reltol*norm(p.b), p.abstol) ||
-        i >= p.maxiters
-    )
-end
-
-function action(p::ConjugateGradientPolicy)
-    (;A, b, x) = p
-    b - A*x
-end
-
-function update!(p::ConjugateGradientPolicy, dᵢ, αᵢ, ηᵢ)
-    p.x += dᵢ * αᵢ/ηᵢ
-end
-
-function maxiters(p::ConjugateGradientPolicy)
-    p.maxiters
+function actor(p::ConjugateGradientPolicy, K, Σy, μ, y)
+    A = K + Σy
+    b = μ - y
+    P = isnothing(p.preconditioner) ? nothing : p.preconditioner(K, Σy)
+    ConjugateGradientActor(A, b, copy(p.x₀), P, p.maxiters, p.abstol, p.reltol)
 end
