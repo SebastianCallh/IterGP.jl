@@ -90,15 +90,14 @@ function Random.rand(rng::AbstractRNG, pfx::FiniteGP{<:PosteriorIterGP}, N::Int 
 end
 
 function AbstractGPs.posterior(fx::FiniteGP{<:IterGP}, y::AbstractVector{<:Real})
-    K = cov(fx)
-    μ = mean(fx)
-    act = actor(fx.f.policy, K, fx.Σy, μ, y)
+    K = kernelmatrix(fx.f.kernel, fx.x)
     K̂ = K + fx.Σy
-
+    δ = y - mean(fx)
+    act = actor(fx.f.policy, K, fx.Σy, δ)
     r = fill(Inf, length(y))
     v = zeros(length(y))
     C = zeros(size(K̂))
-    δ = y - μ
+    
     i = 0
     rs = Array{eltype(y)}[]
     while !done(act, r, i)
@@ -107,8 +106,8 @@ function AbstractGPs.posterior(fx::FiniteGP{<:IterGP}, y::AbstractVector{<:Real}
         αᵢ = sᵢ'r
         dᵢ = (I - C*K̂)*sᵢ
         ηᵢ = sᵢ'K̂*dᵢ
-        C = C + (1/ηᵢ)*dᵢ*dᵢ'
-        v = v + dᵢ*αᵢ/ηᵢ
+        C .+= (1/ηᵢ)*dᵢ*dᵢ'
+        v .+= v + dᵢ*αᵢ/ηᵢ
         update!(act, dᵢ, αᵢ, ηᵢ)
         push!(rs, r)
         i += 1

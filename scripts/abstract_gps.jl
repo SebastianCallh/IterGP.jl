@@ -4,26 +4,40 @@ using LinearAlgebra
 using KernelFunctions
 using Plots
 using AbstractGPs
-#= 
 
-using Preconditioners
-
-using FillArrays
-=#
-
-n = 1000
-σ² = 0.01
+n = 500
+σ² = 0.25
 rng = MersenneTwister(12345)
 x, y = sinusoid(rng, n, σ²)
 xx = collect(1.4 .* range(extrema(x)..., 200))
-# scatter(x, y)
+maxiters = 500
+kernel = Matern52Kernel()
 
-# IterGP implementation
+# cholesky policy
+chol_policy = CholeskyPolicy(length(x), n)
+chol_f = IterGP(kernel, chol_policy)
+chol_fx = chol_f(x, σ²)
+chol_fxx = chol_f(xx, σ²)
+chol_pf, rs = posterior(chol_fx, y);
+
+chol_pfxx = chol_pf(xx, σ²)
+chol_plt = plot(xx, mean(chol_pfxx), ribbon=2 .* sqrt.(var(chol_pfxx)), label="Cholesky policy ")
+scatter!(chol_plt, x, y, label="Data", color=2)
+
+# CG implementation
 maxiters = 500
 chol = CholeskyPreconditioner(15)
 policy = ConjugateGradientPolicy(zeros(n), maxiters, P=chol, abstol=1e-5, reltol=1e-5)
 kernel = Matern52Kernel()
 f = IterGP(kernel, policy)
+fx = f(x, σ²)
+fxx = f(xx, σ²)
+
+
+#= prior_plt = scatter(x, y, label="Data", title="Prior plot")
+plot!(prior_plt, xx, mean(fxx), ribbon=2 .* sqrt.(var(fxx)), color=1, fillalpha=0.4)
+=#
+
 fx = f(x, σ²)
 pf, rs = posterior(fx, y);
 plot(norm.(rs))
@@ -47,16 +61,6 @@ isapprox(pf.v, pf2.v, rtol=1e-4, atol=1e-8)
 isapprox(pfx2.f.C, pfx.f.C; rtol=1e-2, atol=1e-2)
 isapprox(pfx.f.C, Kinv; rtol=1e-2, atol=1e-2)
 isapprox(pfx.f.C, K2inv; rtol=1e-2, atol=1e-2)
-
-pfxx.f.C - Kinv
-pfxx.f.C - Kinv
-
-
-
-#= 
-heatmap(pfx.f.C)
-heatmap(pfx2.f.C)
-=#
 
 # Reference implementation
 f3 = GP(kernel)
@@ -88,3 +92,29 @@ P ≈ P2
 cond(A)
 cond(P\A)
 cond(P2\A)
+
+
+
+### compare with cholesky from main
+
+using WoodburyMatrices
+function cholesky_preconditioner(A, rank, S, zero_threshold=1e-8)
+    A′ = copy(A)
+    n, k = size(A, 1), rank
+    L = Array{eltype(A)}(undef, n, k)
+    for i in 1:rank
+        Iᵢ = A′[:,i] / sqrt(A′[i,i])
+        A′ .= A′ - Iᵢ*Iᵢ'
+        L[:,i] = Iᵢ
+    end
+
+    D = Diagonal(ones(k))
+    L[L .< zero_threshold] .= 0
+    SymWoodbury(S, L, D)
+end
+Σy = pf(x, σ²).Σy
+K = kernelmatrix(kernel, x) + Σy
+rank = 15
+Pold = cholesky_preconditioner(K, rank, Σy)
+Pnew = CholeskyPreconditioner(rank)(K, Σy)
+isapprox(Matrix(Pold), Matrix(Pnew))

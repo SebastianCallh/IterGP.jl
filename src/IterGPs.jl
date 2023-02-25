@@ -13,7 +13,7 @@ using FillArrays
 using AbstractGPs: AbstractGP, FiniteGP, MeanFunction, ZeroMean
 using AbstractGPs: _symmetric, _map_meanfunction
 
-export IterGP, posterior, DiagonalPreconditioner, CholeskyPreconditioner, ConjugateGradientPolicy, sinusoid
+export IterGP, posterior, DiagonalPreconditioner, CholeskyPreconditioner, CholeskyPolicy, ConjugateGradientPolicy, sinusoid
 
 include("piracy.jl")
 include("datasets.jl")
