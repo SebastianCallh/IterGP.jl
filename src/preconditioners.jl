@@ -6,10 +6,10 @@ struct CholeskyPreconditioner{T <: AbstractFloat} <: AbstractPreconditioner
     zero_threshold::T
 end
 
-CholeskyPreconditioner(rank, jitter=1e-8, zero_threshold=1e-8) = CholeskyPreconditioner(rank, jitter, zero_threshold)
+CholeskyPreconditioner(rank, jitter=1e-8, zero_threshold=1e-12) = CholeskyPreconditioner(rank, jitter, zero_threshold)
 
 function (p::CholeskyPreconditioner)(A, Σy)
-    A′ = copy(A) # + Diagonal(fill(p.jitter, size(A, 1)))
+    A′ = copy(A) + Diagonal(fill(p.jitter, size(A, 1)))
     n, k = size(A, 1), p.rank
     L = Array{eltype(A)}(undef, n, k)
     for i in 1:k
