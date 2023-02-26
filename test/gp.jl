@@ -10,12 +10,12 @@
     preconditioner = CholeskyPreconditioner(15)
     kernel = Matern32Kernel()
 
-    pcg = ConjugateGradientPolicy(zeros(n), maxiters, P=preconditioner, abstol=1e-5, reltol=1e-5)
+    pcg = ConjugateGradientPolicy(zeros(n), maxiters, preconditioner)
     pcg_f = IterGP(kernel, pcg)
     pcg_fx = pcg_f(x, σ²)
     pcg_pf, _ = posterior(pcg_fx, y)
 
-    cg = ConjugateGradientPolicy(zeros(n), maxiters, abstol=1e-5, reltol=1e-5)
+    cg = ConjugateGradientPolicy(zeros(n), maxiters)
     cg_f = IterGP(kernel, cg)
     cg_fx = cg_f(x, σ²)
     cg_pf, _ = posterior(cg_fx, y)

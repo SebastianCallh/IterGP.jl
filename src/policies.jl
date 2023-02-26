@@ -19,18 +19,17 @@ struct ConjugateGradientPolicy{
     x₀::Tx
     preconditioner::P
     maxiters::Int
-    abstol::T
-    reltol::T
+    atol::T
+    rtol::T
 end
 
-function ConjugateGradientPolicy(x₀, maxiters; P=nothing, abstol=1e-2, reltol=1e-2)
-    ConjugateGradientPolicy(x₀, P, maxiters, abstol, reltol)
-end
+ConjugateGradientPolicy(x₀, maxiters; atol=1e-16, rtol=1e-16) = ConjugateGradientPolicy(x₀, DiagonalPreconditioner(1.), maxiters, atol, rtol)
+ConjugateGradientPolicy(x₀, maxiters, P; atol=1e-16, rtol=1e-16) = ConjugateGradientPolicy(x₀, P, maxiters, atol, rtol)
 
 maxiters(p::ConjugateGradientPolicy) = p.maxiters
 
 function actor(p::ConjugateGradientPolicy, K, Σy, δ)
     K̂ = K + Σy
     P = p.preconditioner(K, Σy)
-    ConjugateGradientActor(K̂, δ, copy(p.x₀), P, p.maxiters, p.abstol, p.reltol)
+    ConjugateGradientActor(K̂, δ, copy(p.x₀), P, p.maxiters, p.atol, p.rtol)
 end
