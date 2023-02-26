@@ -1,6 +1,4 @@
 @testset begin
-    
-
     n = 100
     σ² = 0.01
     rng = MersenneTwister(12345)
