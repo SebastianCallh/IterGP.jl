@@ -39,10 +39,10 @@ scatter!(cholesky_fit_plt, x, y, label="Data", color=2)
 savefig(cholesky_fit_plt, joinpath("plots", "cholesky_posterior.png"))
 
 rank = 15
+Σy = Diagonal(fill(σ², n))
 x0 = zeros(length(Sx))
 K = kernelmatrix(prior.kernel, Sx)
 P = cholesky_preconditioner(K, rank, σ²)
-
 A = K + σ²*I
 b = Sy - prior.mean.(Sx)
 
@@ -52,8 +52,22 @@ cg_fit_plt = plot(cg_post, xx, title="Conjugate gradients fit"; ylims);
 scatter!(cg_fit_plt, x, y, label="Data", color=2)
 savefig(cg_fit_plt, joinpath("plots", "cg_posterior.png"))
 
+# Yarr! Neede due to https://github.com/timholy/WoodburyMatrices.jl/issues/35
+function WoodburyMatrices._ldiv!(dest, W::SymWoodbury, A::Union{Factorization, Diagonal}, B)
+    WoodburyMatrices.myldiv!(W.tmpN1, A, B)
+    mul!(W.tmpk1, W.V, W.tmpN1)
+    mul!(W.tmpk2, W.Cp, W.tmpk1)
+    mul!(W.tmpN2, W.U, W.tmpk2)
+    WoodburyMatrices.myldiv!(A, W.tmpN2)
+    for i = 1:length(W.tmpN2)
+        @inbounds dest[i] = W.tmpN1[i] - W.tmpN2[i]
+    end
+    return dest
+end
+
 pcg_policy = PreconditionedConjugateGradientPolicy(A, b, x0, n, P)
 pcg_post = posterior(pcg_policy, prior, Sx, Sy);
-cg_fit_plt = plot(cg_post, xx, title="Preconditioned conjugate gradients fit"; ylims);
-scatter!(cg_fit_plt, x, y, label="Data", color=2) 
-savefig(cg_fit_plt, joinpath("plots", "precond_cg_posterior.png"))
+pcg_fit_plt = plot(pcg_post, xx, label=nothing, title="Preconditioned conjugate gradients fit"; ylims)
+scatter!(pcg_fit_plt, x, y, label="Data", color=2)
+savefig(pcg_fit_plt, joinpath("plots", "precond_cg_posterior.png"))
+isapprox(pcg_post.C, cg_post.C, rtol=1e-3, atol=1e-3)
