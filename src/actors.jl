@@ -27,7 +27,7 @@ struct ConjugateGradientActor{
     TA<: AbstractMatrix{T},
     Tb <: AbstractVector{T},
     Tx <: AbstractVector{T},
-    TP <: Union{SymWoodbury{T}, AbstractMatrix}
+    TP <: Union{SymWoodbury{T}, UniformScaling, AbstractMatrix}
 }
     A::TA
     b::Tb

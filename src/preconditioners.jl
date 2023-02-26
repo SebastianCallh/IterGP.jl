@@ -23,10 +23,5 @@ function (p::CholeskyPreconditioner)(A, Σy)
     SymWoodbury(Σy, L, D)
 end
 
-struct DiagonalPreconditioner{T <: AbstractVector{<:AbstractFloat}} <: AbstractPreconditioner
-    diagonal::T
-end
-
-function (p::DiagonalPreconditioner)(A, args...)
-    p.diagonal*I(size(A, 1))
-end
+struct NoPreconditioner <: AbstractPreconditioner end
+function (p::NoPreconditioner)(args...) I end

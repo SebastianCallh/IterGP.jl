@@ -23,7 +23,7 @@ struct ConjugateGradientPolicy{
     rtol::T
 end
 
-ConjugateGradientPolicy(x₀, maxiters; atol=1e-16, rtol=1e-16) = ConjugateGradientPolicy(x₀, DiagonalPreconditioner(onessize(x₀)), maxiters, atol, rtol)
+ConjugateGradientPolicy(x₀, maxiters; atol=1e-16, rtol=1e-16) = ConjugateGradientPolicy(x₀, NoPreconditioner(), maxiters, atol, rtol)
 ConjugateGradientPolicy(x₀, maxiters, P; atol=1e-16, rtol=1e-16) = ConjugateGradientPolicy(x₀, P, maxiters, atol, rtol)
 
 maxiters(p::ConjugateGradientPolicy) = p.maxiters
