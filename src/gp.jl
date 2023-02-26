@@ -107,7 +107,7 @@ function AbstractGPs.posterior(fx::FiniteGP{<:IterGP}, y::AbstractVector{<:Real}
         dᵢ = (I - C*K̂)*sᵢ
         ηᵢ = sᵢ'K̂*dᵢ
         C .+= (1/ηᵢ)*dᵢ*dᵢ'
-        v .+= v + dᵢ*αᵢ/ηᵢ
+        v .+= dᵢ*αᵢ/ηᵢ
         update!(act, dᵢ, αᵢ, ηᵢ)
         push!(rs, r)
         i += 1
