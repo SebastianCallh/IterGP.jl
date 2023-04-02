@@ -1,6 +1,10 @@
-using IterGP
 using Test
+using IterGPs
+using AbstractGPs
+using KernelFunctions
+using LinearAlgebra
+using FillArrays
+using Random
 
-@testset "IterGP.jl" begin
-    # Write your tests here.
-end
+include("preconditioners.jl")
+include("gp.jl")
