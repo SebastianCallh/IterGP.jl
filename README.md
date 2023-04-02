@@ -48,6 +48,11 @@ cg_pf = posterior(cg_fx, y)
 cg_fit_plt = plot_fit(cg_pf, xx, σ², x, y)
 ```
 
+# Implementation details
+The user facing API exposes three primitives: the `IterGP` constructor, various policites, e.g. `ConjugateGradientPolicy`, and the `CholeskyPreconditioner`. Having used these primitives to construct a `GP`, you can call `AbstractGPs.posterior` on it, which is where the magic happens.
+
+As a way to cache computations (such as preconditioners), the policy object itself is not called in the innermost loop. Instead, the policy is used to create an /actor/ which is then called in the inner loop until a convergence criteria is met.
+
 # References
 Apart from the actual paper, these lecture notes ([Scaling GPs](https://media.githubusercontent.com/media/philipphennig/NumericsOfML/main/slides/03_ScalingGPs.pdf)), ([Computation aware GPs](
 https://media.githubusercontent.com/media/philipphennig/NumericsOfML/main/slides/04_ComputationAwareGPs.pdf)) explain a lot of the implementation.
