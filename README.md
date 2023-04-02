@@ -1,7 +1,7 @@
 # IterGPs
 
-A Julia implementation of [Posterior and Computational Uncertainty
-in Gaussian Processes](https://arxiv.org/pdf/2205.15449.pdf).
+A (WIP) Julia implementation of [Posterior and Computational Uncertainty
+in Gaussian Processes](https://arxiv.org/pdf/2205.15449.pdf). If this is interesting to you open a PR!
 
 [![Build Status](https://github.com/SebastianCallh/IterGP.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/SebastianCallh/IterGP.jl/actions/workflows/CI.yml?query=branch%3Amain)
 
@@ -47,3 +47,9 @@ cg_fx = cg_f(x, σ²)
 cg_pf = posterior(cg_fx, y)
 cg_fit_plt = plot_fit(cg_pf, xx, σ², x, y)
 ```
+
+# References
+Apart from the actual paper, these lecture notes ([Scaling GPs](https://media.githubusercontent.com/media/philipphennig/NumericsOfML/main/slides/03_ScalingGPs.pdf)), ([Computation aware GPs](
+https://media.githubusercontent.com/media/philipphennig/NumericsOfML/main/slides/04_ComputationAwareGPs.pdf)) explain a lot of the implementation.
+
+
