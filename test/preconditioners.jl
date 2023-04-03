@@ -7,7 +7,10 @@
     A = K + σ²I
     b = Zeros(n)
 
-    ## Preconditioning does not change solution of linear system
-    P = CholeskyPreconditioner(rand(1:n))(K, σ²I)
-    @test isapprox(A\b, (P\A) \ (P\b))
+    # Preconditioning does not change solution of linear system
+    Pinv = inv(CholeskyPreconditioner(rand(10:n))(K, σ²I))
+    @test isapprox(A\b, Pinv*A \ Pinv*b)
+
+    # Applying preconditioner reduces condition number
+    @test cond(Pinv*A) < cond(A)
 end
