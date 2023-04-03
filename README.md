@@ -35,6 +35,8 @@ end
 kernel = Matern32Kernel()
 
 # Cholesky actions
+rank = 100
+chol_f = IterGP(kernel, CholeskyPolicy(n, rank))
 chol_fx = chol_f(x, σ²)
 chol_pf = posterior(chol_fx, y)
 cholesky_fit_plt = plot_fit(chol_pf, xx, σ², x, y)
