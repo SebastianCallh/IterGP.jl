@@ -17,7 +17,7 @@ struct ConjugateGradientPolicy{
     Tx <: AbstractVector{T}
 } <: AbstractPolicy
     x₀::Tx
-    preconditioner::P
+    Pinv::P
     maxiters::Int
     atol::T
     rtol::T
@@ -30,6 +30,6 @@ maxiters(p::ConjugateGradientPolicy) = p.maxiters
 
 function actor(p::ConjugateGradientPolicy, K, Σy, δ)
     K̂ = K + Σy
-    P = p.preconditioner(K, Σy)
-    ConjugateGradientActor(K̂, δ, copy(p.x₀), P, p.maxiters, p.atol, p.rtol)
+    Pinv = inv(p.Pinv(K, Σy))
+    ConjugateGradientActor(K̂, δ, copy(p.x₀), Pinv, p.maxiters, p.atol, p.rtol)
 end

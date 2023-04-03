@@ -31,14 +31,14 @@ struct ConjugateGradientActor{
     A::TA
     b::Tb
     x::Tx
-    P::TP
+    Pinv::TP
     maxiters::Int
     abstol::T
     reltol::T
 end
 
 action(a::ConjugateGradientActor) = begin 
-    a.P\(a.b - a.A*a.x)
+    a.Pinv*(a.b - a.A*a.x)
 end
 update!(a::ConjugateGradientActor, dᵢ, αᵢ, ηᵢ) = a.x .+= dᵢ * αᵢ/ηᵢ
 done(a::ConjugateGradientActor, r, i) = begin
