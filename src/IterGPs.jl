@@ -8,9 +8,7 @@ using KernelFunctions
 using RecipesBase
 using AbstractGPs
 using AbstractGPs: AbstractGP, FiniteGP, MeanFunction, ZeroMean
-using AbstractGPs: _symmetric, _map_meanfunction
 
-export IterGP
 export CholeskyPolicy, ConjugateGradientPolicy
 export NoPreconditioner, CholeskyPreconditioner
 
