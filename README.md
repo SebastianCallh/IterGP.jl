@@ -48,6 +48,8 @@ plot!(plt, xx, cg_pf, label="CG", title="Posterior after $maxiters iterations", 
 plot!(plt, xx, rand(rng, cg_pf(xx), 5), color=3, label=nothing, alpha=0.5)
 scatter!(plt, x, y, label="Data", color=2)
 ```
+![](plots/readme_example_fit.svg)
+
 
 # Implementation details
 The user facing API exposes three primitives: the `IterGP` constructor, various policites, e.g. `ConjugateGradientPolicy`, and the `CholeskyPreconditioner`. Having used these primitives to construct a `GP`, you can call `AbstractGPs.posterior` on it, which is where the magic happens.
