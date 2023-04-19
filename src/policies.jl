@@ -7,17 +7,15 @@ struct CholeskyPolicy <: AbstractPolicy
     CholeskyPolicy(dim, rank) = new(dim, rank, 1)
 end
 
-function actor(p::CholeskyPolicy, K, args...)
-    CholeskyActor(size(K, 1), p.rank)
-end
+actor(p::CholeskyPolicy, args...) = CholeskyActor(p.dim, p.rank)
 
 struct ConjugateGradientPolicy{
-    P <: Union{Nothing, AbstractPreconditioner},
+    P <: AbstractPreconditioner,
     T <: AbstractFloat,
     Tx <: AbstractVector{T}
 } <: AbstractPolicy
     x₀::Tx
-    Pinv::P
+    P::P
     maxiters::Int
     atol::T
     rtol::T
@@ -30,6 +28,6 @@ maxiters(p::ConjugateGradientPolicy) = p.maxiters
 
 function actor(p::ConjugateGradientPolicy, K, Σy, δ)
     K̂ = K + Σy
-    Pinv = inv(p.Pinv(K, Σy))
+    Pinv = inv(p.P(K, Σy))
     ConjugateGradientActor(K̂, δ, copy(p.x₀), Pinv, p.maxiters, p.atol, p.rtol)
 end
