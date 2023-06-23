@@ -1,4 +1,4 @@
-module IterGPs
+module IterGP
 
 using Random
 using Statistics
