@@ -1,4 +1,4 @@
-struct IterGP{
+struct Posterior{
     Tprior<:FiniteGP,
     T <: AbstractFloat,
     Ty <: AbstractVector{T},
@@ -11,24 +11,24 @@ struct IterGP{
     C::TC
 end
 
-Statistics.mean(f::IterGP, x::AbstractVector) = begin
+Statistics.mean(f::Posterior, x::AbstractVector) = begin
     mean(f.prior.f, x) + cov(f.prior.f, x, f.prior.x)*f.v
 end
 
-Statistics.var(f::IterGP, x::AbstractVector) = diag(cov(f, x)) # should be smarter
-Statistics.cov(f::IterGP, x::AbstractVector) = begin
+Statistics.var(f::Posterior, x::AbstractVector) = diag(cov(f, x)) # should be smarter
+Statistics.cov(f::Posterior, x::AbstractVector) = begin
     cov(f.prior.f, x) - cov(f.prior.f, x, f.prior.x)*f.C*cov(f.prior.f, f.prior.x, x)    
 end
 
-StatsBase.mean_and_cov(f::IterGP, x::AbstractVector) = begin
+StatsBase.mean_and_cov(f::Posterior, x::AbstractVector) = begin
     mean(f, x), cov(f, x)
 end
 
-StatsBase.mean_and_var(f::IterGP, x::AbstractVector) = begin
+StatsBase.mean_and_var(f::Posterior, x::AbstractVector) = begin
     mean(f, x), var(f, x)
 end
 
-function Random.rand(rng::AbstractRNG, pfx::FiniteGP{<:IterGP}, N::Int = 1)
+function Random.rand(rng::AbstractRNG, pfx::FiniteGP{<:Posterior}, N::Int = 1)
     μ, Σ = mean_and_cov(pfx)
     C = cholesky(Hermitian(Σ))
     return μ .+ C.U' * randn(rng, promote_type(eltype(μ), eltype(C)), length(μ), N)
@@ -55,5 +55,5 @@ function AbstractGPs.posterior(fx::FiniteGP, y::AbstractVector{<:Real}, policy::
         update!(act, dᵢ, αᵢ, ηᵢ)
         i += 1
     end
-    IterGP(fx, y, v, C)
+    Posterior(fx, y, v, C)
 end

@@ -1,4 +1,4 @@
-module IterGPs
+module IterGP
 
 using Random
 using Statistics
@@ -15,6 +15,6 @@ export NoPreconditioner, CholeskyPreconditioner
 include("preconditioners.jl")
 include("policies.jl")
 include("actors.jl")
-include("itergp.jl")
+include("posterior.jl")
 
 end

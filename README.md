@@ -1,4 +1,4 @@
-# IterGPs
+# IterGP
 
 A Julia implementation of [Posterior and Computational Uncertainty
 in Gaussian Processes](https://arxiv.org/pdf/2205.15449.pdf).
@@ -6,9 +6,9 @@ in Gaussian Processes](https://arxiv.org/pdf/2205.15449.pdf).
 [![Build Status](https://github.com/SebastianCallh/IterGP.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/SebastianCallh/IterGP.jl/actions/workflows/CI.yml?query=branch%3Amain)
 
 
-## Usage 
+## Usage
 
-IterGPs uses the [AbstractGPs](https://github.com/JuliaGaussianProcesses/AbstractGPs.jl) interface.
+IterGP uses the [AbstractGPs](https://github.com/JuliaGaussianProcesses/AbstractGPs.jl) interface.
 
 
 ```julia
@@ -16,7 +16,7 @@ using Random
 using Plots
 using KernelFunctions
 using AbstractGPs
-using IterGPs
+using IterGP
 
 
 # Generate some toy data
@@ -52,7 +52,7 @@ scatter!(plt, x, y, label="Data", color=2)
 
 
 # Implementation details
-The user facing API exposes three primitives: the `IterGP` constructor, various policites, e.g. `ConjugateGradientPolicy`, and the `CholeskyPreconditioner`. Having used these primitives to construct a `GP`, you can call `AbstractGPs.posterior` on it, which is where the magic happens.
+The IterGP API builds around `AbstractGPs.AbstractGP`, and exposes policies that can be used to call `IterGP.posterior`, which is where the magic happens.
 
 As a way to cache computations (such as preconditioners), the policy object itself is not called in the innermost loop. Instead, the policy is used to create an /actor/ which is then called in the inner loop until a convergence criteria is met.
 
