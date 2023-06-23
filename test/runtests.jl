@@ -1,5 +1,5 @@
 using Test
-using IterGPs
+using IterGP
 using AbstractGPs
 using KernelFunctions
 using LinearAlgebra

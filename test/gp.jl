@@ -10,14 +10,14 @@
     kernel = Matern32Kernel()
 
     pcg = ConjugateGradientPolicy(zeros(n), maxiters, preconditioner)
-    pcg_f = IterGP(kernel, pcg)
+    pcg_f = GP(kernel)
     pcg_fx = pcg_f(x, σ^2)
-    pcg_pf = posterior(pcg_fx, y)
+    pcg_pf = posterior(pcg_fx, y, pcg)
 
     cg = ConjugateGradientPolicy(zeros(n), maxiters)
-    cg_f = IterGP(kernel, cg)
+    cg_f = GP(kernel)
     cg_fx = cg_f(x, σ^2)
-    cg_pf = posterior(cg_fx, y)
+    cg_pf = posterior(cg_fx, y, cg)
 
     # Preconditioned CG converges to the same solution as vanilla CG
     @test isapprox(pcg_pf.v, cg_pf.v, rtol=1e-5, atol=1e-5)
