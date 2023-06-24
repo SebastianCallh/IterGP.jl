@@ -12,6 +12,7 @@ using AbstractGPs: AbstractGP, FiniteGP, MeanFunction, ZeroMean
 export CholeskyPolicy, ConjugateGradientPolicy
 export NoPreconditioner, CholeskyPreconditioner
 
+include("lowrankplusdiagonal.jl")
 include("preconditioners.jl")
 include("policies.jl")
 include("actors.jl")

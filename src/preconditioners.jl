@@ -13,7 +13,7 @@ function (p::CholeskyPreconditioner)(K, Σy)
         K′ .= K′ - Iᵢ*Iᵢ'
         L[:,i] = Iᵢ
     end
-    L*L' + Σy
+    LowRankPlusDiagonal(Σy, L)
 end
 
 struct NoPreconditioner <: AbstractPreconditioner end
